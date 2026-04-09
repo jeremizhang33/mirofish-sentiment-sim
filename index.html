@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MirrorFace · 舆情推演模拟器 · 和平精英</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center">
+    <a class="back" href="/">← 返回工具箱</a>
+    <span style="margin:0 10px;color:var(--text3)">|</span>
+    <h1>🪞 MirrorFace · 舆情推演模拟器</h1>
+    <span class="badge">v1.0</span>
+    <span class="badge badge-offline">🟢 离线可用</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span style="font-size:.78rem;color:var(--text3)">和平精英 · 246个虚拟Agent · 11大阵营 · 无需API Key</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 左侧：输入面板 -->
+  <div class="panel-left">
+    <h2>📋 推演配置</h2>
+
+    <div style="background:#2ed57315;border:1px solid #2ed57340;border-radius:8px;padding:10px;margin-bottom:14px;font-size:.8rem;color:var(--green);line-height:1.5">
+      ✅ <strong>完全离线运行</strong>，无需API Key。基于规则引擎 + 预置语料库 + 情绪传播模型驱动推演。
+    </div>
+
+    <div class="config-section">
+      <div class="config-toggle" onclick="toggleConfig(this)">
+        <span>⚡ 快速预设场景（点击加载）</span><span class="arrow">▼</span>
+      </div>
+      <div class="config-body open" id="presetGrid"></div>
+    </div>
+
+    <div class="form-group">
+      <label>🎯 推演话题 / 事件</label>
+      <textarea id="topicInput" placeholder="例如：和平精英宣布传世武器「弗拉迪尾刺」限时返场，原价2888点券，返场价格不变但新增交易锁定期30天"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>📌 事件类型</label>
+      <select id="eventType">
+        <option value="commercial">💰 商业化动作（皮肤/传世/定价）</option>
+        <option value="update">🔄 版本更新（赛季/玩法/地图）</option>
+        <option value="anticheat">🛡️ 安全治理（外挂/封号/反诈）</option>
+        <option value="collab">🤝 IP联动/跨界合作</option>
+        <option value="esports">🏆 电竞赛事相关</option>
+        <option value="incident">⚠️ 突发事件/舆情危机</option>
+        <option value="custom">📝 自定义</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>🔄 推演轮数 <span id="roundsLabel" style="color:var(--accent)">3</span></label>
+      <input type="range" id="roundsInput" min="1" max="5" value="3" oninput="document.getElementById('roundsLabel').textContent=this.value" style="accent-color:var(--accent)">
+    </div>
+
+    <div class="form-group">
+      <label>👥 每轮参与Agent数 <span id="agentsLabel" style="color:var(--accent)">8</span></label>
+      <input type="range" id="agentsPerRound" min="3" max="15" value="8" oninput="document.getElementById('agentsLabel').textContent=this.value" style="accent-color:var(--accent)">
+    </div>
+
+    <div class="config-section">
+      <div class="config-toggle" onclick="toggleConfig(this)">
+        <span>👥 Agent 画像库（16类 · 246人）</span><span class="arrow">▶</span>
+      </div>
+      <div class="config-body">
+        <div class="agent-grid" id="agentGrid"></div>
+        <div style="font-size:.72rem;color:var(--text3);text-align:center">点击可启用/禁用某类Agent参与推演</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="startBtn" onclick="startSimulation()">
+      🚀 开始推演
+    </button>
+    <button class="btn btn-danger btn-block" id="stopBtn" onclick="stopSimulation()" style="display:none;margin-top:7px">
+      ⏹ 停止推演
+    </button>
+
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text" id="progressText">准备中...</div>
+    </div>
+  </div>
+
+  <!-- 中间：推演时间线 -->
+  <div class="panel-center" id="timelinePanel">
+    <div class="timeline-empty" id="timelineEmpty">
+      <div class="icon">🪞</div>
+      <p><strong>MirrorFace</strong> — 照见舆论的镜子</p>
+      <p style="font-size:.82rem;margin-top:8px;color:var(--text3)">
+        基于 246 个虚拟玩家 Agent · 11 大阵营冲突引擎<br>
+        参考 CF「未来舆情推演系统」方法论<br>
+        <span style="color:var(--green)">✅ 完全离线运行，无需 API Key</span>
+      </p>
+      <div style="margin-top:18px;font-size:.78rem;color:var(--text3);text-align:left;max-width:400px">
+        <div style="margin-bottom:6px;color:var(--accent);font-weight:600">💡 使用说明</div>
+        <div>1. 选择预设场景或输入自定义话题</div>
+        <div>2. 调整推演轮数和每轮Agent数</div>
+        <div>3. 点击「开始推演」观察舆情演变</div>
+        <div>4. 右侧面板实时展示分析数据</div>
+        <div>5. 推演完成后自动生成分析报告</div>
+      </div>
+    </div>
+    <div class="timeline" id="timeline" style="display:none"></div>
+  </div>
+
+  <!-- 右侧：分析面板 -->
+  <div class="panel-right">
+    <h2>📊 实时分析</h2>
+
+    <div class="stat-card">
+      <h3>🔥 危机指数</h3>
+      <div class="stat-value warning" id="crisisScore">--</div>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:3px" id="crisisLevel">等待推演开始</div>
+    </div>
+
+    <div class="stat-card">
+      <h3>💬 情绪分布</h3>
+      <div class="sentiment-bar" id="sentimentBar">
+        <div class="neg" style="width:0%"></div>
+        <div class="neu" style="width:0%"></div>
+        <div class="pos" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.72rem">
+        <span style="color:var(--red)">负面 <span id="negPct">0</span>%</span>
+        <span style="color:var(--yellow)">中性 <span id="neuPct">0</span>%</span>
+        <span style="color:var(--green)">正向 <span id="posPct">0</span>%</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h3>📈 情绪走势</h3>
+      <div id="trendChart" style="min-height:70px"></div>
+    </div>
+
+    <div class="stat-card">
+      <h3>⚔️ 阵营分布</h3>
+      <div id="factionList">
+        <div style="color:var(--text3);font-size:.82rem;text-align:center;padding:18px">等待推演数据</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h3>🔥 热词 TOP5</h3>
+      <div id="hotWords" style="color:var(--text3);font-size:.82rem;text-align:center;padding:18px">等待推演数据</div>
+    </div>
+
+    <div class="stat-card">
+      <h3>📋 推演报告</h3>
+      <div id="reportArea">
+        <div style="color:var(--text3);font-size:.82rem;text-align:center;padding:18px">推演完成后自动生成</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/agents.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
